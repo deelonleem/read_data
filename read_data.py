@@ -70,12 +70,15 @@ class dataPlot():
         return self.file_path
 
 class openFile(QDialog):
+    resized = QtCore.pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.ui = Ui_FileWindow()
         self.ui.setupUi(self)
         #self.ui.pushButton_AddFiles.clicked.connect(self.openFileDialog)
         self.ui.pushButton_RemoveFiles.clicked.connect(self.removeFile)
+        self.resized.connect(self.resizeFunction)
 
         self.ui.listWidget_SelectedFiles.setSelectionMode(
             QtWidgets.QAbstractItemView.ExtendedSelection
@@ -114,7 +117,15 @@ class openFile(QDialog):
         temp = item.data(QtCore.Qt.UserRole)
         return temp
 
+    def resizeEvent(self, event):
+        self.resized.emit()
+        return super(openFile, self).resizeEvent(event)
 
+    def resizeFunction(self):
+        ref = self.ui.listWidget_SelectedFiles.height() # Ref point for buttons to refer to
+        self.ui.listWidget_SelectedFiles.setGeometry(QtCore.QRect(10, 10, self.width()-20, self.height()-150))
+        self.ui.horizontalLayoutWidget.setGeometry(10, ref+20, self.width()-20, 40)
+        print("Open File is resizing to " + str(self.width()) + " x " + str(self.height()))   
 
 class mainWindow(QMainWindow):
     resized = QtCore.pyqtSignal()
@@ -263,9 +274,7 @@ class mainWindow(QMainWindow):
     def resizeFunction(self):
         self.ui.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 0, self.width()-10, self.height()-80))
         self.qmc.setGeometry(QtCore.QRect(0, 0, self.width()-20, self.height()-90))
-
-        # I would like to resize chart here <-----
-        print("Graph is resizing")   
+        print("Main Window is resizing to " + str(self.width()) + " x " + str(self.height()))   
 
 
 class Qt5MplCanvas(FigureCanvas):
