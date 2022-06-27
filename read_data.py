@@ -117,6 +117,7 @@ class openFile(QDialog):
 
 
 class mainWindow(QMainWindow):
+    resized = QtCore.pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -161,6 +162,8 @@ class mainWindow(QMainWindow):
 
         self.openFitSqzVac_Ui.fitSignal.connect(self.fitSignal_clicked)
         self.openFitSqzVac_Ui.fitSignalDone.connect(self.fitSignal_done)
+
+        self.resized.connect(self.resizeFunction)
 
 
         self.show()
@@ -252,6 +255,17 @@ class mainWindow(QMainWindow):
             #if (xfit != None) and (yfit != None):
                 #self.qmc.plot(xfit, y1, f.getFilePath())
             self.qmc.draw()
+
+    def resizeEvent(self, event):
+        self.resized.emit()
+        return super(mainWindow, self).resizeEvent(event)
+
+    def resizeFunction(self):
+        self.ui.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 0, self.width()-10, self.height()-80))
+        self.qmc.setGeometry(QtCore.QRect(0, 0, self.width()-20, self.height()-90))
+
+        # I would like to resize chart here <-----
+        print("Graph is resizing")   
 
 
 class Qt5MplCanvas(FigureCanvas):
